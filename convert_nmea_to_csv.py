@@ -1,4 +1,19 @@
 # coding=utf-8
+#
+# Author @Mario Winkler
+#
+# Parse and structure GPS-Data
+#   - accept NMEA-Log and generate CSV-Position-Log
+#   - calculate distance from Points
+#
+# Credits
+#   - initial version of the parser was heavily inspired by @Ivan Pasic --> http://ipasic.com/article/converting-gps-nmea-data/
+#   - distance calculation formula / script taken from --> http://www.movable-type.co.uk/scripts/latlong.html
+#
+# License (Code and Usage)
+# This code is licenced within Creative Commons (Attribution CC BY) --> https://creativecommons.org/licenses/by/4.0/
+# You can distribute, remix, tweak, and build upon this work, even commercially, as long as you credit you for the original creation (with name)
+#
 
 import math
 
@@ -19,7 +34,7 @@ def getMilliSec(hhmmss):
   return 0
 
 # Distance of two points on the earth surface
-# ‘haversine’ formula isused for asimplified  great-circle distance calculation
+# ‘haversine’ formula isused for a simplified  great-circle distance calculation
 # @pointA, pointB --> [lon, lat]
 # lat, lon must be decimal degrees
 def getDistance(p1, p2):
