@@ -65,7 +65,7 @@ fileOut = open(CSVfile, 'w')
 
 for line in fileIn.readlines():
     GPSdataList = line.split(',') # split line by comma to get list of all the values
-    if GPSdataList[0] == '$GPGGA':  # check if the first value in list is GPGGA
+    if (GPSdataList[0] == '$GPGGA') and (GPSdataList[6] != '0'):  # Validate Sentence-Type and fix-qualtiy parsing
         timestamp = getMilliSec(GPSdataList[1])  # time in UTC hhmmss.ss has the index 1 in the list # hhmmss.ss -> ms or 0
         longitude = GPSdataList[4]  # longitude value has the index 4 in the list
         latitude  = GPSdataList[2]  # latitude value has the index 2 in the list
