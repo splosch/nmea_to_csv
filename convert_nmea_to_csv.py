@@ -38,7 +38,7 @@ def getMilliSec(hhmmss):
 # ‘haversine’ formula isused for a simplified  great-circle distance calculation
 # @pointA, pointB --> [lon, lat]
 # lat, lon must be decimal degrees
-def getDistance(p1, p2):
+def getDistanceHaversine(p1, p2):
   R  = 6371000    #Earth radius meters
 
   lat1 = math.radians(p1["lat"])
@@ -51,17 +51,40 @@ def getDistance(p1, p2):
 
   return R * c;
 
-# require pyproj https://pypi.python.org/pypi/pyproj/ prerun of &> pip install pyproj
+# Distance of two points on the earth surface
+# Spherical Law of Cosines -- explained and talen from --> http://www.movable-type.co.uk/scripts/latlong.html#cosine-law
+# @pointA, pointB --> [lon, lat]
+# lat, lon must be decimal degrees
+def getDistanceCosines(p1, p2):
+  R  = 6371000    #Earth radius meters
 
-GPSfile = "20150917.nmea"
-CSVfile = "20150917_GPGGA_converted.csv"
+  lat1 = math.radians(p1["lat"])
+  lat2 = math.radians(p2["lat"])
+  dlon = math.radians(p2["lon"] - p1["lon"])
+
+  cosines = (math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(dlon))
+
+  #invalid data can cause ABS(...) > 1 which is invalid for acos ... is close to 0 ... so 0-ing
+  if (abs(cosines) > 1):
+    return 0
+
+  return math.acos(cosines) * R
+
+# require pyproj https://pypi.python.org/pypi/pyproj/ prerun of &> pip install pyproj
+exampleFolder = "conversion_example/"
+GPSfile       = "20150917.nmea"
+CSVfile       = "20150917_GPGGA_converted.csv"
 
 basetime = 0
 
 refPoint = {"lon":0,"lat":0,"time":0}
 
-fileIn  = open(GPSfile, 'r')
-fileOut = open(CSVfile, 'w')
+fileIn  = open(exampleFolder + GPSfile, 'r')
+fileOut = open(exampleFolder + CSVfile, 'w')
+
+# write CSV header
+line  = 'time (ms); lon (deg); lat (deg); dist-hav (m); dist-cos (m) \n'
+fileOut.write(line)
 
 for line in fileIn.readlines():
     GPSdataList = line.split(',') # split line by comma to get list of all the values
@@ -83,17 +106,29 @@ for line in fileIn.readlines():
         currentPoint = {
           "lon" : degrees_lon + fraction_lon,  # longitude (decimal degrees)
           "lat" : degrees_lat + fraction_lat,   # latitude (decimal degrees)
-          "time": timestamp
+          "time": timestamp or refPoint["time"]
         }
 
-        distanceToPrevPoint = getDistance(currentPoint, refPoint)
+        # Compare different distance calculations
+        # skip the first measurement
+        if (currentPoint["time"] - basetime) == 0:
+          distanceHaversine = 0
+          distanceCosines   = 0
+        else:
+          distanceHaversine = getDistanceHaversine(currentPoint, refPoint)
+          distanceCosines   = getDistanceCosines(currentPoint, refPoint)
 
         # don't write duplicates
         if not (currentPoint["time"] == refPoint["time"]):
-          fileOut.write(str(currentPoint["time"]-basetime) + ';' + str(currentPoint["lon"]) + ';' + str(currentPoint["lat"]) + ';' + str(distanceToPrevPoint) + '\n')
+          line  = str(currentPoint["time"] - basetime) + ';'
+          line += str(currentPoint["lon"]) + ';'
+          line += str(currentPoint["lat"]) + ';'
+          line += str(distanceHaversine) + ';'
+          line += str(distanceCosines) + '\n'
 
-        # keep current point for next iteration as reference point
-        refPoint = currentPoint
+          fileOut.write(line)
+          # keep current point for next iteration as reference point
+          refPoint = currentPoint
 
 fileIn.close()
 fileOut.close()
