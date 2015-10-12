@@ -26,9 +26,10 @@ def getMilliSec(hhmmss):
     hh = int(hhmmss[0:2])
     mm = int(hhmmss[2:4])
     ss = int(hhmmss[4:6])
-    ms = float(hhmmss[7:] or 0) # allow 2 digit ms if present otherwise fallback
+    ms = int(hhmmss[7:] or 0) # allow 2 digit ms if present otherwise fallback
 
-    if hh and mm and ss:
+    # check wheter there is no 0 timestamp
+    if (hh + mm + ss):
       return (hh * 3600 + mm * 60 + ss) * 1000 + ms
 
   return 0
