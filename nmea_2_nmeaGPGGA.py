@@ -5,6 +5,10 @@
 # Take raw NMEA log and strip out everything but GPGGA Senetences
 # Main use: recover broken nmea Logs with corrupted EOF
 
+# static vars
+SEP = ","
+NEWLINE = '\n'
+
 exampleFolder = "conversion_example/"
 GPSfile       = "20150917.nmea"
 CSVfile       = "example.nmea"
@@ -25,18 +29,37 @@ def getMilliSec(hhmmss):
 
   return 0
 
-
 fileIn  = open(exampleFolder + GPSfile, 'r')
 fileOut = open(exampleFolder + CSVfile, 'w')
+
+# write CSV header
+line  = 'time (ms)' + SEP
+line += 'sentence id' + SEP
+line += 'time (hhmmss)' + SEP
+line += 'lat (deg)' + SEP
+line += 'lat type' + SEP
+line += 'long (deg)' + SEP
+line += 'long type' + SEP
+line += 'fix quality' + SEP
+line += 'satelites' + SEP
+line += 'HDOP' + SEP
+line += 'alt' + SEP
+line += 'alt unit' + SEP
+line += 'h above WGS84' + SEP
+line += 'h unit' + SEP
+line += 'checksum' + NEWLINE #for debugging reasons transformed the hhmmss time into absolute ms time
+fileOut.write(line)
 
 for line in fileIn.readlines():
   GPSdataList = line.split(',')
 
-  if (GPSdataList[0] == '$GPGGA') and (GPSdataList[6] != '0'): 	# only one type of nea sentences accepted # no fix (quality), no data ...
+  # no fix (6), no data ...
+  # only one type of nema sentences accepted
+  if (GPSdataList[0] == '$GPGGA') and (GPSdataList[6] != '0'):
 	timestamp = GPSdataList[1]
 	timeInMs  = getMilliSec(timestamp)
-	line += str(timestamp) + ';'
-	line += str(timeInMs) + ''
+	#line += str(timestamp) + SEP
+	line = str(timeInMs) + SEP + line
   	fileOut.write(line)
 
 fileIn.close()

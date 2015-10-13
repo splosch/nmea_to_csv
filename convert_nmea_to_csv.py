@@ -17,6 +17,10 @@
 
 import math
 
+# static vars
+SEP = ","
+NEWLINE = '\n'
+
 # helpers
 
 # getMilliSec
@@ -83,7 +87,11 @@ fileIn  = open(exampleFolder + GPSfile, 'r')
 fileOut = open(exampleFolder + CSVfile, 'w')
 
 # write CSV header
-line  = 'time (ms); lon (deg); lat (deg); dist-hav (m); dist-cos (m) \n'
+line  = 'time (ms)' + SEP
+line += 'lon (deg)' + SEP
+line += 'lat (deg)' + SEP
+line += 'dist-hav (m)' + SEP
+line += 'dist-cos (m)' + NEWLINE
 fileOut.write(line)
 
 for line in fileIn.readlines():
@@ -120,11 +128,11 @@ for line in fileIn.readlines():
 
         # don't write duplicates
         if not (currentPoint["time"] == refPoint["time"]):
-          line  = str(currentPoint["time"] - basetime) + ';'
-          line += str(currentPoint["lon"]) + ';'
-          line += str(currentPoint["lat"]) + ';'
-          line += str(distanceHaversine) + ';'
-          line += str(distanceCosines) + '\n'
+          line  = str(currentPoint["time"] - basetime) + SEP
+          line += str(currentPoint["lon"]) + SEP
+          line += str(currentPoint["lat"]) + SEP
+          line += str(distanceHaversine) + SEP
+          line += str(distanceCosines) + NEWLINE
 
           fileOut.write(line)
           # keep current point for next iteration as reference point
