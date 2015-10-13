@@ -1,4 +1,4 @@
-time (ms),sentence id,time (hhmmss),lat (deg),lat type,long (deg),long type,fix quality,satelites,HDOP,alt,alt unit,h above WGS84,h unit,checksum
+time (ms),sentence id,time (hhmmss),lat (deg),lat type,long (deg),long type,fix quality,satelites,HDOP,alt,alt unit,h above WGS84,h unit,,checksum
 21834000,$GPGGA,060354,5220.010986,N,00924.813320,E,1,03,0.9,94.0,M,46.0,M,,*74
 21834000,$GPGGA,060354,5220.010986,N,00924.813320,E,1,03,0.9,94.0,M,46.0,M,,*74
 21835000,$GPGGA,060355,5220.010597,N,00924.817028,E,1,08,0.8,102.0,M,46.0,M,,*42

@@ -11,7 +11,7 @@ NEWLINE = '\n'
 
 exampleFolder = "conversion_example/"
 GPSfile       = "20150917.nmea"
-CSVfile       = "example.nmea"
+CSVfile       = "nmea_to_csv_debug.csv"
 
 # getMilliSec
 # hhmmss is a string timestamp of format hhmmss or hhmmss.ss
@@ -47,7 +47,7 @@ line += 'alt' + SEP
 line += 'alt unit' + SEP
 line += 'h above WGS84' + SEP
 line += 'h unit' + SEP
-line += 'checksum' + NEWLINE #for debugging reasons transformed the hhmmss time into absolute ms time
+line += SEP +'checksum' + NEWLINE #for debugging reasons transformed the hhmmss time into absolute ms time
 fileOut.write(line)
 
 for line in fileIn.readlines():
