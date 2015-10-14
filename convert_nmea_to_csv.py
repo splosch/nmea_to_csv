@@ -15,11 +15,16 @@
 # You can distribute, remix, tweak, and build upon this work, even commercially, as long as you credit you for the original creation (with name)
 #
 
+# Import the pyproj module previously required -- require pyproj https://pypi.python.org/pypi/pyproj/ prerun of &> pip install pyproj
 import math
+import pyproj
 
 # static vars
 SEP = ","
 NEWLINE = '\n'
+
+# LatLon with WGS84 datum used by GPS units and Google Earth
+wgs84=pyproj.Proj("+init=EPSG:4326")
 
 # helpers
 
@@ -90,6 +95,8 @@ fileOut = open(exampleFolder + CSVfile, 'w')
 line  = 'time (ms)' + SEP
 line += 'lon (deg)' + SEP
 line += 'lat (deg)' + SEP
+line += 'x (wgs84)' + SEP
+line += 'y (wgs84)' + SEP
 line += 'dist-hav (m)' + SEP
 line += 'dist-cos (m)' + NEWLINE
 fileOut.write(line)
@@ -111,9 +118,14 @@ for line in fileIn.readlines():
         degrees_lat  = float(latitude[:2] or 0)
         fraction_lat = float(latitude[2:] or 0) / 60
 
+        #
+        x, y = wgs84(degrees_lon + fraction_lon, degrees_lat + fraction_lat)
+
         currentPoint = {
           "lon" : degrees_lon + fraction_lon,  # longitude (decimal degrees)
-          "lat" : degrees_lat + fraction_lat,   # latitude (decimal degrees)
+          "lat" : degrees_lat + fraction_lat,  # latitude  (decimal degrees)
+          "x"   : x,
+          "y"   : y,
           "time": timestamp or refPoint["time"]
         }
 
@@ -131,6 +143,8 @@ for line in fileIn.readlines():
           line  = str(currentPoint["time"] - basetime) + SEP
           line += str(currentPoint["lon"]) + SEP
           line += str(currentPoint["lat"]) + SEP
+          line += str(currentPoint["x"]) + SEP
+          line += str(currentPoint["y"]) + SEP
           line += str(distanceHaversine) + SEP
           line += str(distanceCosines) + NEWLINE
 
