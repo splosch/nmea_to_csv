@@ -1,8 +1,8 @@
 
 <!-- saved from url=(0044)http://bl.ocks.org/phil-pedruco/raw/9852362/ -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-    <script src="./example_3d_box_resources/three.min.js"></script><style type="text/css"></style>
-    <script src="./example_3d_box_resources/d3.v3.min.js" charset="utf-8"></script>
+    <script src="conversion_example/example_3d_box_resources/three.min.js"></script><style type="text/css"></style>
+    <script src="conversion_example/example_3d_box_resources/d3.v3.min.js" charset="utf-8"></script>
     <style type="text/css">
     body {
         margin: 0px;
@@ -109,7 +109,7 @@
 
     var format = d3.format("+.3f");
 
-    var data = d3.csv("./example_biking_wgs84_xyz.csv", function (d) {
+    var data = d3.csv("conversion_example/example_biking_wgs84_xyz.csv", function (d) {
 
         d.forEach(function (d,i) {
             unfiltered[i] = {
