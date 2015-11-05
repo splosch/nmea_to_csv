@@ -43,6 +43,26 @@ def getMilliSec(hhmmss):
 
   return 0
 
+# rescale float number from source to target coordinate system
+# @sval   number the value to be converted           e.g. 25.0
+# @source [ min, max ] where min, max of type float  e.g. [0,100]
+# @target [ min, max ] where min, max of type float  e.g. [0,30]
+# @return target_value as number
+# >>> rescale(25.0, [0,100], [0,30])
+# >>> 7.5
+def rescale(sval, source, target):
+  smin, smax = source
+  tmin, tmax = target
+
+  sdiff = smax - smin
+  tdiff = tmax - tmin
+
+  factor = (sval - smin) / sdiff
+
+  tval = tmin + (factor * tdiff)
+
+  return tval
+
 # Distance of two points on the earth surface
 # ‘haversine’ formula isused for a simplified  great-circle distance calculation
 # @pointA, pointB --> [lon, lat]
@@ -83,13 +103,15 @@ def getDistanceCosines(p1, p2):
 exampleFolder = "conversion_example/"
 GPSfile       = "20150917.nmea"
 CSVfile       = "20150917_GPGGA_converted.csv"
+XYZfile       = "20150917_wgs84_xyz.csv"
 
 basetime = 0
 
 refPoint = {"lon":0,"lat":0,"time":0}
 
-fileIn  = open(exampleFolder + GPSfile, 'r')
-fileOut = open(exampleFolder + CSVfile, 'w')
+fileIn     = open(exampleFolder + GPSfile, 'r')
+fileOut    = open(exampleFolder + CSVfile, 'w')
+xyzFileOut = open(exampleFolder + XYZfile, 'w')
 
 # write CSV header
 line  = 'time (ms)' + SEP
@@ -100,6 +122,8 @@ line += 'y (wgs84)' + SEP
 line += 'dist-hav (m)' + SEP
 line += 'dist-cos (m)' + NEWLINE
 fileOut.write(line)
+
+xyzFileOut.write('x'+SEP+'y'+SEP+'z'+NEWLINE)
 
 for line in fileIn.readlines():
     GPSdataList = line.split(',') # split line by comma to get list of all the values
@@ -122,11 +146,12 @@ for line in fileIn.readlines():
         x, y = wgs84(degrees_lon + fraction_lon, degrees_lat + fraction_lat)
 
         currentPoint = {
-          "lon" : degrees_lon + fraction_lon,  # longitude (decimal degrees)
-          "lat" : degrees_lat + fraction_lat,  # latitude  (decimal degrees)
-          "x"   : x,
-          "y"   : y,
-          "time": timestamp or refPoint["time"]
+          "lon"   : degrees_lon + fraction_lon,  # longitude (decimal degrees)
+          "lat"   : degrees_lat + fraction_lat,  # latitude  (decimal degrees)
+          "x"     : x,
+          "y"     : y,
+          "height": float(GPSdataList[9]),
+          "time"  : timestamp or refPoint["time"]
         }
 
         # Compare different distance calculations
@@ -148,7 +173,15 @@ for line in fileIn.readlines():
           line += str(distanceHaversine) + SEP
           line += str(distanceCosines) + NEWLINE
 
+          # rescaling with [0,1] s target system is done to create a factor to be applied
+          # for printing the xyz points within a 3d box
+          # a 0.1 difference of two points in x direction is not equal to a 0.1 difference in y or z direction
+          xyzLine  = str(currentPoint["x"]) + SEP
+          xyzLine += str(currentPoint["height"]) + SEP
+          xyzLine += str(currentPoint["y"]) + NEWLINE
+
           fileOut.write(line)
+          xyzFileOut.write(xyzLine)
           # keep current point for next iteration as reference point
           refPoint = currentPoint
 
