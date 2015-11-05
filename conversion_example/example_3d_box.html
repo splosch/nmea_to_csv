@@ -10,7 +10,7 @@
     }
     #container {
         width:960px;
-        height:500px;
+        height:700px;
     }
     </style>
 
@@ -81,7 +81,7 @@
         antialias: true
     });
     var w = 960;
-    var h = 500;
+    var h = 700;
     renderer.setSize(w, h);
     document.body.appendChild(renderer.domElement);
 
@@ -109,7 +109,7 @@
 
     var format = d3.format("+.3f");
 
-    var data = d3.csv("./20150917_wgs84_xyz.csv", function (d) {
+    var data = d3.csv("./example_biking_wgs84_xyz.csv", function (d) {
 
         d.forEach(function (d,i) {
             unfiltered[i] = {
@@ -258,15 +258,14 @@
         var x = xScale(unfiltered[i].x);
         var y = yScale(unfiltered[i].y);
         var z = zScale(unfiltered[i].z);
+        var data = unfiltered[i].data;
 
         pointGeo.vertices.push(new THREE.Vector3(x, y, z));
         //console.log(pointGeo.vertices);
         //pointGeo.vertices[i].angle = Math.atan2(z, x);
         //pointGeo.vertices[i].radius = Math.sqrt(x * x + z * z);
         //pointGeo.vertices[i].speed = (z / 100) * (x / 100);
-        pointGeo.colors.push(new THREE.Color().setRGB(
-          hexToRgb(colour(i)).r / 255, hexToRgb(colour(i)).g / 255, hexToRgb(colour(i)).b / 255
-        ));
+        pointGeo.colors.push(new THREE.Color().setRGB(data, data, data));
 
     }
     var points = new THREE.ParticleSystem(pointGeo, mat);
@@ -297,7 +296,7 @@
             sy += dy;
         }
     }
-    var animating = false;
+    var animating = true;
     window.ondblclick = function() {
         animating = !animating;
     };
@@ -329,7 +328,7 @@
 
     })
     //-->
-    </script><canvas width="960" height="500" style="width: 960px; height: 500px;"></canvas>
+    </script><canvas width="960" height="700" style="width: 960px; height: 700px;"></canvas>
 
 
 
