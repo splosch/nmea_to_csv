@@ -158,50 +158,60 @@
                   .domain(zExent)
                   .range([-50,50]);
 
-    var lineGeo = new THREE.Geometry();
-    lineGeo.vertices.push(
-        v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zCen)),
-        v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zCen)),
-        v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMax)), v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMin)),
+    /*
+     * Drawing a cube on the boundaries of given data
+     */
+    var obj_boundaryCube = {
+        material : {
+            color: 0x000000,
+            lineWidth: 1
+        },
 
-        v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)),
-        v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+        points : [
+            // top layer points
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
+            // bottom layer points
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)),
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin))
+        ],
 
-        v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMax)),
-        v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMin)),
-        v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zCen)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zCen)),
+        lines : [
+            [4, 5],[4, 6],[5, 7],[6, 7], // top edges
+            [0, 1],[0, 2],[1, 3],[2, 3], // bottom edges
+            [0, 4],[1, 5],[2, 6],[3, 7]  // side edges
+        ],
 
-        v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)),
-        v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
+        createGeometry : function() {
+            var geometry = new THREE.Geometry();
 
-        v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMax)),
-        v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)),
-        v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zCen)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zCen)),
+            this.lines.forEach(function(line){
+                var start = line[0],
+                    end   = line[1];
+                geometry.vertices.push(this.points[start], this.points[end]);
+            }.bind(this));
 
-        v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
-        v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
-        v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
-        v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),
+            return geometry;
+        },
 
-        v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMax)),
-        v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMax)),
-        v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)),
-        v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax))
+        build : function () {
+            var material   = new THREE.LineBasicMaterial(this.material),
+                cubeBorder = new THREE.Line(this.createGeometry(), material);
 
-    );
-    var lineMat = new THREE.LineBasicMaterial({
-        color: 0x000000,
-        lineWidth: 1
-    });
-    var line = new THREE.Line(lineGeo, lineMat);
-    line.type = THREE.Lines;
-    scatterPlot.add(line);
+            cubeBorder.type = THREE.Lines;
+
+            // draw the object elements
+            scatterPlot.add(cubeBorder);
+        }
+    };
+
+    // initialize the object
+    obj_boundaryCube.build();
+
 
     var titleX = createText2D('-X');
     titleX.position.x = xScale(vpts.xMin) - 12,
