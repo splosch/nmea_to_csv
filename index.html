@@ -103,60 +103,63 @@
         return new THREE.Vector3(x, y, z);
     }
 
-    var unfiltered = [],
-        lowPass = [],
-        highPass = [];
+    var data = {
+        format     : d3.format("+.3f"),
+        unfiltered : [],
+        min : {},
+        max : {},
 
-    var format = d3.format("+.3f");
+        // retrieving min and max values for each dimension array
+        // TODO: make this dynamic based on data provided
+        setBoundaries : function () {
+            var getBoundariesFor = function(entity){
+                    return d3.extent(this.unfiltered, function (d) {return d[entity];});
+                }.bind(this),
+                xExent = getBoundariesFor("x"),
+                yExent = getBoundariesFor("y"),
+                zExent = getBoundariesFor("z");
+                dataExent = getBoundariesFor("data");
 
-    var data = d3.csv("conversion_example/example_biking_wgs84_xyz.csv", function (d) {
+            this.min.x = xExent[0];
+            this.max.x = xExent[1];
+            this.min.y = yExent[0];
+            this.max.y = yExent[1];
+            this.min.z = zExent[0];
+            this.max.z = zExent[1];
+            this.min.data = dataExent[0];
+            this.max.data = dataExent[1];
+        },
 
-        d.forEach(function (d,i) {
-            unfiltered[i] = {
-                x: +d.x,
-                y: +d.y,
-                z: +d.z,
-                data: +d.data
-            };
-            lowPass[i] = {
-                x: +d.lp_x,
-                y: +d.lp_y,
-                z: +d.lp_z
-            };
-            highPass[i] = {
-                x: +d.hp_x,
-                y: +d.hp_y,
-                z: +d.hp_z
+        setScale : function() {
+            this.xScale = d3.scale.linear().domain([this.min.x, this.max.x]).range([-50,50]);
+            this.yScale = d3.scale.linear().domain([this.min.y, this.max.y]).range([-50,50]);
+            this.zScale = d3.scale.linear().domain([this.min.z, this.max.z]).range([-50,50]);
+        },
+
+        onCSVFileLoad : function (callback, rows) {
+            rows.forEach(function (row, index) {
+                this.unfiltered.push({
+                    x: +row.x,
+                    y: +row.y,
+                    z: +row.z,
+                    data: +row.data
+                });
+            }.bind(this));
+
+            this.setBoundaries();
+            this.setScale();
+
+            if (callback && typeof callback === "function") {
+                callback(this);
             }
-        })
+        }
+    };
 
-    var xExent = d3.extent(unfiltered, function (d) {return d.x; }),
-        yExent = d3.extent(unfiltered, function (d) {return d.y; }),
-        zExent = d3.extent(unfiltered, function (d) {return d.z; });
-
-    var vpts = {
-        xMax: xExent[1],
-        xCen: (xExent[1] + xExent[0]) / 2,
-        xMin: xExent[0],
-        yMax: yExent[1],
-        yCen: (yExent[1] + yExent[0]) / 2,
-        yMin: yExent[0],
-        zMax: zExent[1],
-        zCen: (zExent[1] + zExent[0]) / 2,
-        zMin: zExent[0]
+    function loadCSV(filename, data, callback) {
+        // fetch and parse a csv file and return a array of objects e.g.:
+        // [{ x : 123, y : 234, z : 345, data : "ABC" }, {...}, ...]
+        d3.csv(filename, data.onCSVFileLoad.bind(data, callback));
     }
-
-    var colour = d3.scale.category20c();
-
-    var xScale = d3.scale.linear()
-                  .domain(xExent)
-                  .range([-50,50]);
-    var yScale = d3.scale.linear()
-                  .domain(yExent)
-                  .range([-50,50]);
-    var zScale = d3.scale.linear()
-                  .domain(zExent)
-                  .range([-50,50]);
 
     /*
      * Drawing a cube on the boundaries of given data
@@ -167,24 +170,28 @@
             lineWidth: 1
         },
 
-        points : [
-            // top layer points
-            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),
-            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
-            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
-            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
-            // bottom layer points
-            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)),
-            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)),
-            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)),
-            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin))
-        ],
+        points : [],
 
         lines : [
             [4, 5],[4, 6],[5, 7],[6, 7], // top edges
             [0, 1],[0, 2],[1, 3],[2, 3], // bottom edges
             [0, 4],[1, 5],[2, 6],[3, 7]  // side edges
         ],
+
+        setPointsFromData : function (data) {
+            this.points = [
+                // top layer points
+                v(data.xScale(data.min.x), data.yScale(data.min.y), data.zScale(data.max.z)),
+                v(data.xScale(data.min.x), data.yScale(data.max.y), data.zScale(data.max.z)),
+                v(data.xScale(data.max.x), data.yScale(data.min.y), data.zScale(data.max.z)),
+                v(data.xScale(data.max.x), data.yScale(data.max.y), data.zScale(data.max.z)),
+                // bottom layer points
+                v(data.xScale(data.min.x), data.yScale(data.min.y), data.zScale(data.min.z)),
+                v(data.xScale(data.min.x), data.yScale(data.max.y), data.zScale(data.min.z)),
+                v(data.xScale(data.max.x), data.yScale(data.min.y), data.zScale(data.min.z)),
+                v(data.xScale(data.max.x), data.yScale(data.max.y), data.zScale(data.min.z))
+            ];
+        },
 
         createGeometry : function() {
             var geometry = new THREE.Geometry();
@@ -198,9 +205,12 @@
             return geometry;
         },
 
-        build : function () {
-            var material   = new THREE.LineBasicMaterial(this.material),
-                cubeBorder = new THREE.Line(this.createGeometry(), material);
+        buildWith : function (data) {
+            var material = new THREE.LineBasicMaterial(this.material),
+                cubeBorder;
+
+            this.setPointsFromData(data);
+            cubeBorder = new THREE.Line(this.createGeometry(), material);
 
             cubeBorder.type = THREE.Lines;
 
@@ -209,134 +219,140 @@
         }
     };
 
-    // initialize the object
-    obj_boundaryCube.build();
-
-
-    var titleX = createText2D('-X');
-    titleX.position.x = xScale(vpts.xMin) - 12,
-    titleX.position.y = 5;
-    scatterPlot.add(titleX);
-
-    var valueX = createText2D(format(xExent[0]));
-    valueX.position.x = xScale(vpts.xMin) - 12,
-    valueX.position.y = -5;
-    scatterPlot.add(valueX);
-
-    var titleX = createText2D('X');
-    titleX.position.x = xScale(vpts.xMax) + 12;
-    titleX.position.y = 5;
-    scatterPlot.add(titleX);
-
-    var valueX = createText2D(format(xExent[1]));
-    valueX.position.x = xScale(vpts.xMax) + 12,
-    valueX.position.y = -5;
-    scatterPlot.add(valueX);
-
-    var titleY = createText2D('-Y');
-    titleY.position.y = yScale(vpts.yMin) - 5;
-    scatterPlot.add(titleY);
-
-    var valueY = createText2D(format(yExent[0]));
-    valueY.position.y = yScale(vpts.yMin) - 15,
-    scatterPlot.add(valueY);
-
-    var titleY = createText2D('Y');
-    titleY.position.y = yScale(vpts.yMax) + 15;
-    scatterPlot.add(titleY);
-
-    var valueY = createText2D(format(yExent[1]));
-    valueY.position.y = yScale(vpts.yMax) + 5,
-    scatterPlot.add(valueY);
-
-    var titleZ = createText2D('-Z ' + format(zExent[0]));
-    titleZ.position.z = zScale(vpts.zMin) + 2;
-    scatterPlot.add(titleZ);
-
-    var titleZ = createText2D('Z ' + format(zExent[1]));
-    titleZ.position.z = zScale(vpts.zMax) + 2;
-    scatterPlot.add(titleZ);
-
-    var mat = new THREE.ParticleBasicMaterial({
-        vertexColors: true,
-        size: 10
+    loadCSV("conversion_example/example_biking_wgs84_xyz.csv", data, function(data) {
+        // initialize the object
+        obj_boundaryCube.buildWith(data);
+        renderCubeLabel(data);
+        renderCSVDataPlot(data);
     });
 
-    var pointCount = unfiltered.length;
-    var pointGeo = new THREE.Geometry();
-    for (var i = 0; i < pointCount; i ++) {
-        var x = xScale(unfiltered[i].x);
-        var y = yScale(unfiltered[i].y);
-        var z = zScale(unfiltered[i].z);
-        var data = unfiltered[i].data;
+    renderCubeLabel = function (data) {
+        var titleX = createText2D('-X');
+        titleX.position.x = data.xScale(data.min.x) - 12,
+        titleX.position.y = 5;
+        scatterPlot.add(titleX);
 
-        pointGeo.vertices.push(new THREE.Vector3(x, y, z));
-        //console.log(pointGeo.vertices);
-        //pointGeo.vertices[i].angle = Math.atan2(z, x);
-        //pointGeo.vertices[i].radius = Math.sqrt(x * x + z * z);
-        //pointGeo.vertices[i].speed = (z / 100) * (x / 100);
-        pointGeo.colors.push(new THREE.Color().setRGB(data, data, data));
+        var valueX = createText2D(data.format(data.min.x));
+        valueX.position.x = data.xScale(data.min.x) - 12,
+        valueX.position.y = -5;
+        scatterPlot.add(valueX);
 
-    }
-    var points = new THREE.ParticleSystem(pointGeo, mat);
-    scatterPlot.add(points);
+        var titleX = createText2D('X');
+        titleX.position.x = data.xScale(data.max.x) + 12;
+        titleX.position.y = 5;
+        scatterPlot.add(titleX);
 
-    renderer.render(scene, camera);
-    var paused = false;
-    var last = new Date().getTime();
-    var down = false;
-    var sx = 0,
-        sy = 0;
+        var valueX = createText2D(data.format([data.min.x, data.max.x][1]));
+        valueX.position.x = data.xScale(data.max.x) + 12,
+        valueX.position.y = -5;
+        scatterPlot.add(valueX);
 
-    window.onmousedown = function(ev) {
-        down = true;
-        sx = ev.clientX;
-        sy = ev.clientY;
+        var titleY = createText2D('-Y');
+        titleY.position.y = data.yScale(data.min.z) - 5;
+        scatterPlot.add(titleY);
+
+        var valueY = createText2D(data.format(data.min.y));
+        valueY.position.y = data.yScale(data.min.z) - 15,
+        scatterPlot.add(valueY);
+
+        var titleY = createText2D('Y');
+        titleY.position.y = data.yScale(data.max.y) + 15;
+        scatterPlot.add(titleY);
+
+        var valueY = createText2D(data.format(data.max.y));
+        valueY.position.y = data.yScale(data.max.y) + 5,
+        scatterPlot.add(valueY);
+
+        var titleZ = createText2D('-Z ' + data.format(data.min.z));
+        titleZ.position.z = data.zScale(data.min.z) + 2;
+        scatterPlot.add(titleZ);
+
+        var titleZ = createText2D('Z ' + data.format(data.max.z));
+        titleZ.position.z = data.zScale(data.max.z) + 2;
+        scatterPlot.add(titleZ);
     };
-    window.onmouseup = function() {
-        down = false;
-    };
-    window.onmousemove = function(ev) {
-        if (down) {
-            var dx = ev.clientX - sx;
-            var dy = ev.clientY - sy;
-            scatterPlot.rotation.y += dx * 0.01;
-            camera.position.y += dy;
-            sx += dx;
-            sy += dy;
+
+    renderCSVDataPlot = function (data) {
+        var mat = new THREE.ParticleBasicMaterial({
+            vertexColors: true,
+            size: 10
+        });
+
+        var pointCount = data.unfiltered.length;
+        var pointGeo = new THREE.Geometry();
+        for (var i = 0; i < pointCount; i ++) {
+            var x = data.xScale(data.unfiltered[i].x);
+            var y = data.yScale(data.unfiltered[i].y);
+            var z = data.zScale(data.unfiltered[i].z);
+            var speed = data.unfiltered[i].data;
+
+            pointGeo.vertices.push(new THREE.Vector3(x, y, z));
+            //console.log(pointGeo.vertices);
+            //pointGeo.vertices[i].angle = Math.atan2(z, x);
+            //pointGeo.vertices[i].radius = Math.sqrt(x * x + z * z);
+            //pointGeo.vertices[i].speed = (z / 100) * (x / 100);
+            pointGeo.colors.push(new THREE.Color().setRGB(speed, speed, speed));
+
         }
-    }
-    var animating = true;
-    window.ondblclick = function() {
-        animating = !animating;
-    };
+        var points = new THREE.ParticleSystem(pointGeo, mat);
+        scatterPlot.add(points);
 
-    function animate(t) {
-        if (!paused) {
-            last = t;
-            if (animating) {
-                var v = pointGeo.vertices;
-                for (var i = 0; i < v.length; i++) {
-                    var u = v[i];
-                    //console.log(u)
-                    u.angle += u.speed * 0.01;
-                    u.x = Math.cos(u.angle) * u.radius;
-                    u.z = Math.sin(u.angle) * u.radius;
-                }
-                pointGeo.__dirtyVertices = true;
+        renderer.render(scene, camera);
+        var paused = false;
+        var last = new Date().getTime();
+        var down = false;
+        var sx = 0,
+            sy = 0;
+
+        window.onmousedown = function(ev) {
+            down = true;
+            sx = ev.clientX;
+            sy = ev.clientY;
+        };
+        window.onmouseup = function() {
+            down = false;
+        };
+        window.onmousemove = function(ev) {
+            if (down) {
+                var dx = ev.clientX - sx;
+                var dy = ev.clientY - sy;
+                scatterPlot.rotation.y += dx * 0.01;
+                camera.position.y += dy;
+                sx += dx;
+                sy += dy;
             }
-            renderer.clear();
-            camera.lookAt(scene.position);
-            renderer.render(scene, camera);
         }
-        window.requestAnimationFrame(animate, renderer.domElement);
-    };
-    animate(new Date().getTime());
-    onmessage = function(ev) {
-        paused = (ev.data == 'pause');
+        var animating = true;
+        window.ondblclick = function() {
+            animating = !animating;
+        };
+
+        function animate(t) {
+            if (!paused) {
+                last = t;
+                if (animating) {
+                    var v = pointGeo.vertices;
+                    for (var i = 0; i < v.length; i++) {
+                        var u = v[i];
+                        //console.log(u)
+                        u.angle += u.speed * 0.01;
+                        u.x = Math.cos(u.angle) * u.radius;
+                        u.z = Math.sin(u.angle) * u.radius;
+                    }
+                    pointGeo.__dirtyVertices = true;
+                }
+                renderer.clear();
+                camera.lookAt(scene.position);
+                renderer.render(scene, camera);
+            }
+            window.requestAnimationFrame(animate, renderer.domElement);
+        };
+        animate(new Date().getTime());
+        onmessage = function(ev) {
+            paused = (ev.data == 'pause');
+        };
     };
 
-    })
     //-->
     </script><canvas width="960" height="700" style="width: 960px; height: 700px;"></canvas>
 
