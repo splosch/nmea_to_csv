@@ -1,3 +1,8 @@
+/*
+ * Initial version taken from Phil Pedruco & refactored
+ * http://bl.ocks.org/phil-pedruco/raw/9852362/
+ */
+
 function createTextCanvas(text, color, font, size) {
     size = size || 16;
     var canvas = document.createElement('canvas');
@@ -185,54 +190,36 @@ var obj_boundaryCube = {
 loadCSV("../conversion_example/example_biking_wgs84_xyz.csv", data, function(data) {
     // initialize the object
     obj_boundaryCube.buildWith(data);
-    renderCubeLabel(data);
+    renderCubeLabels(data);
     renderCSVDataPlot(data);
 });
 
-renderCubeLabel = function (data) {
-    var titleX = createText2D('-X');
-    titleX.position.x = data.xScale(data.min.x) - 12,
-    titleX.position.y = 5;
-    scatterPlot.add(titleX);
+renderCubeLabels = function (data) {
+    var offset = 10,
+        labels = [
+            { name: "-X", value: data.min.x, x: data.xScale(data.min.x) - offset, y: 0, z: null },
+            { name: "X",  value: data.max.x, x: data.xScale(data.max.x) + offset, y: 0, z: null },
+            { name: "-Y", value: data.min.y, x: null, y: data.yScale(data.min.y) - offset, z: null },
+            { name: "Y",  value: data.max.y, x: null, y: data.yScale(data.max.y) + offset, z: null },
+            { name: "-Z", value: data.min.z, x: null, y: 0, z: data.zScale(data.min.z) - offset },
+            { name: "Z",  value: data.max.z, x: null, y: 0, z: data.zScale(data.max.z) + offset }
+        ];
 
-    var valueX = createText2D(data.format(data.min.x));
-    valueX.position.x = data.xScale(data.min.x) - 12,
-    valueX.position.y = -5;
-    scatterPlot.add(valueX);
+    function renderLabel (label) {
+        var text = createText2D(label.name),
+            value= createText2D(data.format(label.value));
 
-    var titleX = createText2D('X');
-    titleX.position.x = data.xScale(data.max.x) + 12;
-    titleX.position.y = 5;
-    scatterPlot.add(titleX);
+        text.position.x = value.position.x = label.x;
+        text.position.y = label.y;
+        text.position.z = value.position.z = label.z;
 
-    var valueX = createText2D(data.format([data.min.x, data.max.x][1]));
-    valueX.position.x = data.xScale(data.max.x) + 12,
-    valueX.position.y = -5;
-    scatterPlot.add(valueX);
+        value.position.y = label.y - offset;
 
-    var titleY = createText2D('-Y');
-    titleY.position.y = data.yScale(data.min.z) - 5;
-    scatterPlot.add(titleY);
+        scatterPlot.add(text);
+        scatterPlot.add(value);
+    }
 
-    var valueY = createText2D(data.format(data.min.y));
-    valueY.position.y = data.yScale(data.min.z) - 15,
-    scatterPlot.add(valueY);
-
-    var titleY = createText2D('Y');
-    titleY.position.y = data.yScale(data.max.y) + 15;
-    scatterPlot.add(titleY);
-
-    var valueY = createText2D(data.format(data.max.y));
-    valueY.position.y = data.yScale(data.max.y) + 5,
-    scatterPlot.add(valueY);
-
-    var titleZ = createText2D('-Z ' + data.format(data.min.z));
-    titleZ.position.z = data.zScale(data.min.z) + 2;
-    scatterPlot.add(titleZ);
-
-    var titleZ = createText2D('Z ' + data.format(data.max.z));
-    titleZ.position.z = data.zScale(data.max.z) + 2;
-    scatterPlot.add(titleZ);
+    labels.forEach(renderLabel);
 };
 
 renderCSVDataPlot = function (data) {
