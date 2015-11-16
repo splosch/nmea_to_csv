@@ -91,7 +91,7 @@ var stage = {
   width  : 960,
   height : 700,
   parentElement : document.body,
-  camera : false,
+  camera : undefined,
   scene  : new THREE.Scene(),
   scatterPlot : new THREE.Object3D(),
   renderer    : new THREE.WebGLRenderer({ antialias: true }),
@@ -105,8 +105,8 @@ var stage = {
   setCamera: function () {
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 10000);
     this.camera.position.z = 200;
-    this.camera.position.x = -100;
-    this.camera.position.y = 100;
+    this.camera.position.x = 0;
+    this.camera.position.y = 0;
   },
 
   setScene: function() {
@@ -124,7 +124,6 @@ var stage = {
     this.last   = new Date().getTime();
     this.sx = 0;
     this.sy = 0;
-    this.animating = true;
 
     window.onmousedown = function(event) {
       this.down = true;
@@ -142,7 +141,8 @@ var stage = {
             dy = event.clientY - this.sy;
 
         this.scatterPlot.rotation.y += dx * 0.01;
-        this.camera.position.y += dy;
+        this.scatterPlot.rotation.x += dy * 0.01;
+        //this.camera.position.y += dy;
         this.sx += dx;
         this.sy += dy;
 
