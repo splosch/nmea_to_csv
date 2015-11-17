@@ -234,7 +234,7 @@ var obj_boundaryCube = {
 
   points : [],
 
-  lines : [
+  connectedEdges : [
     [4, 5],[4, 6],[5, 7],[6, 7], // top edges
     [0, 1],[0, 2],[1, 3],[2, 3], // bottom edges
     [0, 4],[1, 5],[2, 6],[3, 7]  // side edges
@@ -258,9 +258,9 @@ var obj_boundaryCube = {
   createGeometry : function() {
     var geometry = new THREE.Geometry();
 
-    this.lines.forEach(function(line){
-      var start = line[0],
-      end   = line[1];
+    this.connectedEdges.forEach(function(connection){
+      var start = connection[0],
+          end   = connection[1];
       geometry.vertices.push(this.points[start], this.points[end]);
     }.bind(this));
 
@@ -325,12 +325,7 @@ function pointsFromData (data) {
     var speed = data.unfiltered[i].data;
 
     pointGeo.vertices.push(new THREE.Vector3(x, y, z));
-    //console.log(pointGeo.vertices);
-    //pointGeo.vertices[i].angle = Math.atan2(z, x);
-    //pointGeo.vertices[i].radius = Math.sqrt(x * x + z * z);
-    //pointGeo.vertices[i].speed = (z / 100) * (x / 100);
     pointGeo.colors.push(new THREE.Color().setRGB(speed, speed, speed));
-
   }
   var points = new THREE.ParticleSystem(pointGeo, mat);
 
