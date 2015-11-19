@@ -1,26 +1,35 @@
-function pointsFromData (data) {
-  var mat = new THREE.ParticleBasicMaterial({
-    vertexColors: true,
-    size: 10
-  });
+require(["D3", "stage", "data", "cube", "helper"], function(D3, stage, data, cube, helper) {
+  function pointsFromData (data, range) {
+    var p = {},
+        pointsCount = data.unfiltered.length,
+        pointGeo   = new THREE.Geometry(),
+        mat        = new THREE.ParticleBasicMaterial({
+                        vertexColors: true,
+                        size: 10
+                      }),
+        iStart  = Math.floor((range[0] || 0) * pointsCount),
+        iEnd    = Math.floor((range[1] || 1) * pointsCount);
 
-  var pointCount = data.unfiltered.length;
-  var pointGeo = new THREE.Geometry();
-  for (var i = 0; i < pointCount; i ++) {
-    var x = data.xScale(data.unfiltered[i].x);
-    var y = data.yScale(data.unfiltered[i].y);
-    var z = data.zScale(data.unfiltered[i].z);
-    var speed = data.unfiltered[i].data;
+    for (var i = 0; i < pointsCount; i ++) {
+      var inRange = (i >= iStart) && (i <= iEnd);
 
-    pointGeo.vertices.push(new THREE.Vector3(x, y, z));
-    pointGeo.colors.push(new THREE.Color().setRGB(speed, speed, speed));
+      p = {
+        x : data.xScale(data.unfiltered[i].x),
+        y : data.yScale(data.unfiltered[i].y),
+        z : data.zScale(data.unfiltered[i].z),
+        speed : data.unfiltered[i].data
+      };
+
+      p.color = new THREE.Color().setRGB(inRange ? 1 : p.speed, p.speed, p.speed);
+
+      pointGeo.vertices.push(helper.vector3d(p.x, p.y, p.z));
+      pointGeo.colors.push(p.color);
+    }
+
+    return new THREE.ParticleSystem(pointGeo, mat);
   }
-  var points = new THREE.ParticleSystem(pointGeo, mat);
 
-  return points;
-}
 
-require(["D3", "stage", "data", "cube"], function(D3, stage, data, cube) {
   function loadCSV(filename, data, callback) {
     // fetch and parse a csv file and return a array of objects e.g.:
     // [{ x : 123, y : 234, z : 345, data : "ABC" }, {...}, ...]
@@ -31,7 +40,7 @@ require(["D3", "stage", "data", "cube"], function(D3, stage, data, cube) {
     stage.init(document.body, window);
 
     stage.scatterPlot.add(cube.buildWith(positionData));
-    stage.scatterPlot.add(pointsFromData(positionData));
+    stage.scatterPlot.add(pointsFromData(positionData, [0.2,0.3]));
 
     stage.render();
   });

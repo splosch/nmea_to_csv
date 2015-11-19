@@ -16,7 +16,7 @@ requirejs.config({
     paths: {
     	D3:    'd3.v3.min',
     	three: 'three.min',
-    	helper: 'helper',
+    	helper: 'helpers',
 
         app: '../app/main',
         stage: '../app/stage',
