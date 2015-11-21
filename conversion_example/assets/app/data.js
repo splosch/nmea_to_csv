@@ -6,6 +6,7 @@ define(["D3"], function(D3) {
     unfiltered : [],
     min : {},
     max : {},
+    highlight: [0.2, 0.3], // highlight defines an area whch should be marked [start, end], values are float between 0..1
 
       // retrieving min and max values for each dimension array
       // TODO: make this dynamic based on data provided
@@ -26,6 +27,16 @@ define(["D3"], function(D3) {
         this.max.z = zExent[1];
         this.min.data = dataExent[0];
         this.max.data = dataExent[1];
+      },
+
+
+      setRange : function (range) {
+        if (range && range[1]) {
+          var absRange = range[1] - range[0];
+          if (typeof absRange === "number" && absRange > 0 && absRange < 1) {
+            this.highlight = range;
+          }
+        }
       },
 
       setScale : function() {
