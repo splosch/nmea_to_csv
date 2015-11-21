@@ -40,7 +40,7 @@ require(["D3", "stage", "data", "cube", "helper"], function(D3, stage, data, cub
     stage.init(document.body, window);
 
     stage.scatterPlot.add(cube.buildWith(positionData));
-    stage.scatterPlot.add(pointsFromData(positionData, [0.2,0.3]));
+    stage.scatterPlot.add(pointsFromData(positionData, data.highlight));
 
     stage.render();
   });
