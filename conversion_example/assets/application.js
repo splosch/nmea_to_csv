@@ -5,7 +5,6 @@
  * _______________________________________________________
  */
 
-
 // For any third party dependencies, like jQuery, place them in the lib folder.
 
 // Configure loading modules from the lib directory,
@@ -14,6 +13,7 @@
 requirejs.config({
     baseUrl: 'conversion_example/assets/lib',
     paths: {
+    	jQuery: 'jquery_v1.7.1.min',
     	D3:    'd3.v3.min',
     	three: 'three.min',
     	helper: 'helpers',
@@ -21,11 +21,15 @@ requirejs.config({
         app: '../app/main',
         stage: '../app/stage',
         data: '../app/data',
-        cube: '../app/cube'
+        cube: '../app/cube',
+        controls: '../app/controls'
     },
     shim: {
         three: {
             exports: 'THREE'
+        },
+        jQuery: {
+            exports: '$'
         }
     }
 });
