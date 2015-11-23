@@ -1,4 +1,4 @@
-require(["D3", "stage", "data", "cube", "helper"], function(D3, stage, data, cube, helper) {
+require(["D3", "stage", "data", "cube", "helper", "three", "controls"], function(D3, stage, data, cube, helper, THREE, controls) {
   function pointsFromData (data, range) {
     var p = {},
         pointsCount = data.unfiltered.length,
@@ -36,7 +36,7 @@ require(["D3", "stage", "data", "cube", "helper"], function(D3, stage, data, cub
     D3.csv(filename, data.onCSVFileLoad.bind(data, callback));
   }
 
-  loadCSV("../conversion_example/example_biking_wgs84_xyz.csv", data, function(positionData) {
+  loadCSV("conversion_example/example_biking_wgs84_xyz.csv", data, function(positionData) {
     stage.init(document.body, window);
 
     stage.scatterPlot.add(cube.buildWith(positionData));
@@ -44,6 +44,9 @@ require(["D3", "stage", "data", "cube", "helper"], function(D3, stage, data, cub
 
     stage.render();
   });
+
+  controls.rangeSlider.init();
+
 });
 
 
