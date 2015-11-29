@@ -37,10 +37,17 @@ require(["D3", "stage", "data", "cube", "helper", "three", "controls"], function
   }
 
   loadCSV("conversion_example/example_biking_wgs84_xyz.csv", data, function(positionData) {
+    var base = window.document.body;
+
     stage.init(document.body, window);
 
     stage.scatterPlot.add(cube.buildWith(positionData));
     stage.scatterPlot.add(pointsFromData(positionData, data.highlight));
+
+    // main.js dispatches events to force decoupling of individual modules
+    $(window.document.body).on("data.updated", function(){
+      stage.render();
+    }.apply(this, stage));
 
     stage.render();
   });
