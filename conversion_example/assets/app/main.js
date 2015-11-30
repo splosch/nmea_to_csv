@@ -30,27 +30,20 @@ require(["D3", "stage", "data", "cube", "helper", "three", "controls"], function
   }
 
 
-  function loadCSV(filename, data, callback) {
-    // fetch and parse a csv file and return a array of objects e.g.:
-    // [{ x : 123, y : 234, z : 345, data : "ABC" }, {...}, ...]
-    D3.csv(filename, data.onCSVFileLoad.bind(data, callback));
-  }
+  var base = window.document.body;
 
-  loadCSV("conversion_example/example_biking_wgs84_xyz.csv", data, function(positionData) {
-    var base = window.document.body;
-
-    stage.init(document.body, window);
-
-    // main.js dispatches events to force decoupling of individual modules
-    $(window.document.body).on("data.updated", function(){
-      stage.scatterPlot.add(cube.buildWith(positionData));
-      stage.scatterPlot.add(pointsFromData(positionData, data.highlight));
-      stage.render();
-    }.bind(this, stage));
-
-  });
-
+  stage.init(document.body, window);
+  data.init("conversion_example/example_biking_wgs84_xyz.csv");
   controls.rangeSlider.init();
+
+  // main.js dispatches events to force decoupling of individual modules
+  $(window.document.body).on("data.updated", function(){
+
+    // TBD avoid adding scatterplot again (its just added on top of the old ... instead replace)
+    stage.scatterPlot.add(cube.buildWith(data));
+    stage.scatterPlot.add(pointsFromData(data, data.highlight));
+    stage.render();
+  }.bind(this, stage));
 
 });
 

@@ -57,7 +57,7 @@ define(["jQuery", "D3"], function($, D3) {
       }.bind(this));
     },
 
-    onCSVFileLoad : function (callback, rows) {
+    fileLoaded : function (rows) {
       rows.forEach(function (row, index) {
         this.unfiltered.push({
           x: +row.x,
@@ -71,9 +71,11 @@ define(["jQuery", "D3"], function($, D3) {
       this.setScale();
       this.listenToEvents();
 
-      if (callback && typeof callback === "function") {
-        callback(this);
-      }
+      $(window.document.body).trigger("data.updated");
+    },
+
+    init : function (filename) {
+      D3.csv(filename, this.fileLoaded.bind(this));
     }
   };
 });
