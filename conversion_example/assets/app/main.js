@@ -41,15 +41,13 @@ require(["D3", "stage", "data", "cube", "helper", "three", "controls"], function
 
     stage.init(document.body, window);
 
-    stage.scatterPlot.add(cube.buildWith(positionData));
-    stage.scatterPlot.add(pointsFromData(positionData, data.highlight));
-
     // main.js dispatches events to force decoupling of individual modules
     $(window.document.body).on("data.updated", function(){
+      stage.scatterPlot.add(cube.buildWith(positionData));
+      stage.scatterPlot.add(pointsFromData(positionData, data.highlight));
       stage.render();
-    }.apply(this, stage));
+    }.bind(this, stage));
 
-    stage.render();
   });
 
   controls.rangeSlider.init();
