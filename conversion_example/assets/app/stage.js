@@ -2,6 +2,7 @@ define(["three"], function(THREE) {
   "use strict";
 
   return {
+    stageId: "fullPlott",
     width  : 960,
     height : 700,
     parentElement : document.body,
@@ -32,24 +33,24 @@ define(["three"], function(THREE) {
       this.renderer.render(this.scene, this.camera);
     },
 
-    listenToUserInteraction: function(window) {
+    listenToUserInteraction: function(container) {
       this.paused = false;
       this.down   = false;
       this.last   = new Date().getTime();
       this.sx = 0;
       this.sy = 0;
 
-      window.onmousedown = function(event) {
+      container.onmousedown = function(event) {
         this.down = true;
         this.sx = event.clientX;
         this.sy = event.clientY;
       }.bind(this);
 
-      window.onmouseup = function() {
+      container.onmouseup = function() {
         this.down = false;
       }.bind(this);
 
-      window.onmousemove = function(event) {
+      container.onmousemove = function(event) {
         if (this.down) {
           var dx = event.clientX - this.sx,
               dy = event.clientY - this.sy;
@@ -66,6 +67,8 @@ define(["three"], function(THREE) {
     },
 
     init: function(parentElement) {
+      var container = $(this.stageId)[0] || window;
+
       if (parentElement) {
         this.parentElement = parentElement;
       }
@@ -73,7 +76,7 @@ define(["three"], function(THREE) {
       this.setRenderer();
       this.setCamera();
       this.setScene();
-      this.listenToUserInteraction(window);
+      this.listenToUserInteraction(container);
     }
   };
 });
