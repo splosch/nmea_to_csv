@@ -2,7 +2,7 @@
  * Drawing a cube on the boundaries of given data
  */
 
-define(["three", "D3", "stage", "data", "helper"], function(THREE, D3, stage, data, helper) {
+define(["three", "stage", "data", "helper"], function(THREE, stage, data, helper) {
   "use strict";
 
   return {
@@ -19,7 +19,7 @@ define(["three", "D3", "stage", "data", "helper"], function(THREE, D3, stage, da
         [0, 4],[1, 5],[2, 6],[3, 7]  // side edges
       ],
 
-      setPointsFromData : function (data) {
+      setPointsFromData : function () {
         this.points = [
           // top layer points
           helper.vector3d(data.xScale(data.min.x), data.yScale(data.min.y), data.zScale(data.max.z)),
@@ -46,7 +46,7 @@ define(["three", "D3", "stage", "data", "helper"], function(THREE, D3, stage, da
         return geometry;
       },
 
-      renderCubeLabels : function (data) {
+      renderCubeLabels : function () {
         var offset = 10,
             labels = [
               { name: "-X", value: data.min.x, x: data.xScale(data.min.x) - offset, y: 0, z: null },
@@ -74,17 +74,17 @@ define(["three", "D3", "stage", "data", "helper"], function(THREE, D3, stage, da
         labels.forEach(renderLabel);
       },
 
-      buildWith : function (data) {
+      draw : function () {
         var material = new THREE.LineBasicMaterial(this.material),
         cubeBorder;
 
-        this.setPointsFromData(data);
+        this.setPointsFromData();
         cubeBorder = new THREE.Line(this.createGeometry(), material);
 
         cubeBorder.type = THREE.Lines;
 
         // draw cubeLabels
-        this.renderCubeLabels(data);
+        this.renderCubeLabels();
         // draw the object elements
         return cubeBorder;
       }
