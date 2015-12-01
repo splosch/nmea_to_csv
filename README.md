@@ -67,6 +67,7 @@ Object Hirarchie
           +-- [cube] ()
           |     * frame & labels
           |
-          +-- [scatterPlot] ()
+          +-- [particles] ()
+                * draw the data plot
 
 

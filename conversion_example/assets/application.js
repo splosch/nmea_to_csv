@@ -22,6 +22,7 @@ requirejs.config({
         stage: '../app/stage',
         data: '../app/data',
         cube: '../app/cube',
+        particles: '../app/particles',
         controls: '../app/controls'
     },
     shim: {
