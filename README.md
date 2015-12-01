@@ -13,6 +13,7 @@ Starting Point (raw smartphone sensor data)
 * Accelarometer data (tbd.)
 
 Tools
+-------
 * Python Script
  * to extract Position, Timing, Altitude
  * sanitize Readings
@@ -33,3 +34,39 @@ CREDITS
 * Initial version taken from Phil Pedruco & refactored to split modules out that can be used for data-segment analysis & comparison
 * NMEA Parsing heavily inspired by @Ivan Pasic --> http://ipasic.com/article/converting-gps-nmea-data/
 * distance calculation formula / script taken from --> http://www.movable-type.co.uk/scripts/latlong.html
+
+
+Object Hirarchie
+=========
+* works for one shared dataset only.
+* Still outlines & prepares decoupling of modules but since all depend on central data, no real decoupling is possible
+* outlook: objects have their own share of data
+ * as such objects can be instantiated independently
+
+[main] (app)
+  |   * init stage, data
+  |   * dispatch events between moduls e.g. ('data.updated' ->  'stage.rerender')
+  |   * tempates & helpers
+  |
+  +-- [controls] ()
+  |       * change aspects of other app modules
+  |       * emit events (control.range.set)
+  |
+  +-- [data] ()
+  |       * load, interpret, csv files
+  |       * sections, boundaries, helpers(e.g min, max, rescale)
+  |
+  +-- [stage] ()
+      |   * container for rendering (camera, scene, objects)
+      |   * dispatch stage interaction (e.g. drag->rotate)
+      |   * listen to 'stage.rerender'
+      |
+      +-- [objects]
+          |   * lifetime management (add, init, remove)
+          |
+          +-- [cube] ()
+          |     * frame & labels
+          |
+          +-- [scatterPlot] ()
+
+

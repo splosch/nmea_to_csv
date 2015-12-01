@@ -1,13 +1,13 @@
 define(["jQuery"], function($) {
   "use strict";
 
-  var base = window;
+  var base = window.document.body;
 
   return {
 
     rangeSlider : {
-      startSliderSel : "#data_range_start",
-      endSliderSel   : "#data_range_end",
+      startSliderSel : "data_range_start",
+      endSliderSel   : "data_range_end",
       start       : 0,
       end         : 1,
 
@@ -19,22 +19,22 @@ define(["jQuery"], function($) {
         $(base).append(endSlider);
       },
 
-      bindEventHandlers : function(sliderSelector){
+      bindEventHandlers : function(){
         // for simplicity, if one range slider receives a change
         // read and store both slder values
 
-        $(base).on("change", sliderSelector,  function(event) {
-          this.start = this.startSliderSel.val();
-          this.end   = this.endSliderSel.val();
+        $(window.document.body).on("change", function(event) {
+          this.start = $(base).find("#"+this.startSliderSel).val();
+          this.end   = $(base).find("#"+this.endSliderSel).val();
 
           // on every change populate new range to update the dataset
-          $(this).trigger("data.updateHighlightRange", { "range" : [this.start, this.end] });
-        }, false);
+          $(base).trigger("data.updateHighlightRange", { "start" : this.start, "end" : this.end });
+        }.bind(this));
       },
 
       init : function () {
         this.renderSliders();
-        this.bindEventHandlers(this.startSlider + ", " + this.endSlider);
+        this.bindEventHandlers();
       }
     }
   };
